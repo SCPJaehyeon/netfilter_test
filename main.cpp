@@ -14,15 +14,23 @@ static char *host;
 static int cmp;
 int police(unsigned char *data){
     printf("IN police \n");
-    if(data[9] == 0x06 && data[22] == 0x00 && data[23] == 0x50){
+    if(data[9] == 0x06 && data[22] == 0x00 && data[23] == 0x50){ //Check TCP(6), HTTP(80)
         printf("ok1 \n");
-        if(data[40] == 0x47 && data[41] == 0x45 && data[42] == 0x54){
+        if((data[40] == 0x47 && data[41] == 0x45 && data[42] == 0x54) || //Check GET
+                 (data[40] == 0x50 && data[41] == 0x4f && data[42] == 0x53 && data[43] == 0x54) || //Check POST
+                 (data[40] == 0x48 && data[41] == 0x45 && data[42] == 0x41 && data[43] == 0x44) || //Check HEAD
+                 (data[40] == 0x50 && data[41] == 0x55 && data[42] == 0x54) || //Check PUT
+                 (data[40] == 0x44 && data[41] == 0x45 && data[42] == 0x4c && data[43] == 0x45 && data[44] == 0x54 && data[45] == 0x45) || //Check DELETE
+                 (data[40] == 0x43 && data[41] == 0x4f && data[42] == 0x4e && data[43] == 0x4e && data[44] == 0x45 && data[45] == 0x43 && data[46] == 0x54) || //Check CONNECT
+                 (data[40] == 0x4f && data[41] == 0x50 && data[42] == 0x54 && data[43] == 0x49 && data[44] == 0x4f && data[45] == 0x4e && data[46] == 0x53) || //Check OPTIONS
+                 (data[40] == 0x54 && data[41] == 0x52 && data[42] == 0x41 && data[43] == 0x43 && data[44] == 0x45) || //Check TRACE
+                 (data[40] == 0x50 && data[41] == 0x41 && data[42] == 0x54 && data[43] == 0x43 && data[44] == 0x48)){ //Check PATCH
             printf("ok2 \n");
             int i;
-            for (i=43;i<55;i++){
-                if(data[i] == 0x0d && data[i+1] == 0x0a){
+            for (i=43;i<55;i++){ //Find ':'
+                if(data[i] == 0x0d && data[i+1] == 0x0a){ //Check Host':'
                     printf("find %d \n",i);
-                    int cmp = memcmp(host, &data[i+8],sizeof(host));
+                    int cmp = memcmp(host, &data[i+8],sizeof(host)); //Check argv[1] and Request HOST
                     return cmp;
                 }
             }
